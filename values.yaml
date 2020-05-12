@@ -274,6 +274,11 @@ proxy:
 
 # If expose the service via "ingress", the Nginx will not be used
 nginx:
+  serviceAccount:
+    create: true
+    name: ""
+  rbac: true
+  psp: true
   image:
     repository: goharbor/nginx-photon
     tag: v1.10.2
@@ -289,14 +294,19 @@ nginx:
   podAnnotations: {}
 
 portal:
+  serviceAccount:
+    create: true
+    name: ""
+  rbac: true
+  psp: true
   image:
     repository: goharbor/harbor-portal
     tag: v1.10.2
   replicas: 1
-# resources:
-#  requests:
-#    memory: 256Mi
-#    cpu: 100m
+  # resources:
+  #  requests:
+  #    memory: 256Mi
+  #    cpu: 100m
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -304,6 +314,11 @@ portal:
   podAnnotations: {}
 
 core:
+  serviceAccount:
+    create: true
+    name: ""
+  rbac: true
+  psp: true
   image:
     repository: goharbor/harbor-core
     tag: v1.10.2
@@ -335,6 +350,11 @@ core:
   xsrfKey: ""
 
 jobservice:
+  serviceAccount:
+    create: true
+    name: ""
+  rbac: true
+  psp: true
   image:
     repository: goharbor/harbor-jobservice
     tag: v1.10.2
@@ -342,10 +362,10 @@ jobservice:
   maxJobWorkers: 10
   # The logger for jobs: "file", "database" or "stdout"
   jobLogger: file
-# resources:
-#   requests:
-#     memory: 256Mi
-#     cpu: 100m
+  # resources:
+  #   requests:
+  #     memory: 256Mi
+  #     cpu: 100m
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -357,6 +377,11 @@ jobservice:
   secret: ""
 
 registry:
+  serviceAccount:
+    create: true
+    name: ""
+  rbac: true
+  psp: true
   registry:
     image:
       repository: goharbor/registry-photon
@@ -411,6 +436,11 @@ chartmuseum:
   enabled: true
   # Harbor defaults ChartMuseum to returning relative urls, if you want using absolute url you should enable it by change the following value to 'true'
   absoluteUrl: false
+  serviceAccount:
+    create: true
+    name: ""
+  rbac: true
+  psp: true
   image:
     repository: goharbor/chartmuseum-photon
     tag: v1.10.2
@@ -443,6 +473,11 @@ clair:
     #  requests:
     #    memory: 256Mi
     #    cpu: 100m
+  serviceAccount:
+    create: true
+    name: ""
+  rbac: true
+  psp: true
   replicas: 1
   # The interval of clair updaters, the unit is hour, set to 0 to
   # disable the updaters
@@ -455,6 +490,11 @@ clair:
 
 notary:
   enabled: true
+  serviceAccount:
+    create: true
+    name: ""
+  rbac: true
+  psp: true
   server:
     image:
       repository: goharbor/notary-server-photon
@@ -491,6 +531,11 @@ database:
   # and fill the connection informations in "external" section
   type: internal
   internal:
+    serviceAccount:
+      create: true
+      name: ""
+    rbac: true
+    psp: true
     image:
       repository: goharbor/harbor-db
       tag: v1.10.2
@@ -539,6 +584,11 @@ redis:
   # and fill the connection informations in "external" section
   type: internal
   internal:
+    serviceAccount:
+      create: true
+      name: ""
+    rbac: true
+    psp: true
     image:
       repository: goharbor/redis-photon
       tag: v1.10.2
@@ -562,3 +612,43 @@ redis:
     password: ""
   ## Additional deployment annotations
   podAnnotations: {}
+
+# RBAC settings, PSP is added to the end automatically.
+rbac:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - pods
+    verbs:
+      - get
+      - watch
+      - list
+
+# Pod Security Policy for Harbor, provides a single place to configure it.
+psp:
+  allowPrivilegeEscalation: true
+  allowedCapabilities:
+    - "*"
+  fsGroup:
+    rule: RunAsAny
+  hostIPC: true
+  hostNetwork: true
+  hostPID: true
+  hostPorts:
+    - max: 65535
+      min: 0
+  privileged: true
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+    - "*"
+
+# Security Context, defines the user to run as who should be the owner of the necessary directories.
+securityContext:
+  privileged: true

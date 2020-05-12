@@ -30,8 +30,11 @@ spec:
 {{ toYaml .Values.nginx.podAnnotations | indent 8 }}
 {{- end }}
     spec:
+      {{- if .Values.nginx.rbac }}
+      serviceAccountName: {{ template "harbor.nginx-serviceAccountName" . }}
       securityContext:
-        fsGroup: 10000
+{{ toYaml .Values.securityContext | indent 8 }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
